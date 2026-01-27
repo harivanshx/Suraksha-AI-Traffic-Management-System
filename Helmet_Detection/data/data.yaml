@@ -1,9 +1,0 @@
-# Example data.yaml for YOLOv8
-# Update paths to match your dataset location
-
-train: ../data/train/images
-val: ../data/val/images
-test: # optional
-
-nc: 3 # number of classes
-names: ["Motorcyclist", "Helmet", "No-Helmet"] # class names

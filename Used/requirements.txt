@@ -1,0 +1,9 @@
+flask
+opencv-python
+numpy
+ultralytics
+tensorflow
+pandas
+seaborn
+matplotlib
+pillow

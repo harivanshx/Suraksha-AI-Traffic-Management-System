@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Detection - AI Traffic Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-nav">
+                    <a href="/" class="back-btn">
+                        <span>←</span>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <div class="header-text">
+                    <h1>🚨 Accident Detection</h1>
+                    <p>Upload an image to detect accidents and identify vehicle plates</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Upload Section -->
+            <div class="accident-upload-section">
+                <div class="upload-card">
+                    <h2>📷 Upload Image</h2>
+                    <p class="upload-hint">Upload a traffic scene image to detect potential accidents</p>
+
+                    <input type="file" id="accident-file-input" accept="image/*" style="display: none;">
+
+                    <div class="accident-drop-zone" id="accident-drop-zone">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <p class="drop-text">Drag & Drop or Click to Upload</p>
+                            <p class="file-info" id="accident-file-info">Supported: JPG, PNG, BMP</p>
+                        </div>
+                    </div>
+
+                    <div class="upload-preview" id="upload-preview" style="display: none;">
+                        <img id="preview-image" src="" alt="Preview">
+                        <button class="btn-remove" id="remove-image">✕ Remove</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="analyze-btn" class="btn-primary" disabled>
+                        <span class="btn-icon">🔍</span>
+                        Analyze Image
+                    </button>
+                </div>
+
+                <div class="processing-info" id="processing-info" style="display: none;">
+                    <div class="loader"></div>
+                    <p>Analyzing image for accidents...</p>
+                </div>
+            </div>
+
+            <!-- Results Section (Initially Hidden) -->
+            <div class="accident-results-section" id="results-section" style="display: none;">
+                <h2>🔎 Detection Results</h2>
+
+                <!-- Detection Status -->
+                <div class="detection-status" id="detection-status">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Annotated Image -->
+                <div class="result-image-container" id="result-image-container">
+                    <h3>Annotated Image</h3>
+                    <img id="result-image" src="" alt="Detection Result">
+                </div>
+
+                <!-- Detected Vehicles -->
+                <div class="detected-items" id="detected-vehicles">
+                    <h3>🚗 Detected Vehicles</h3>
+                    <div class="items-grid" id="vehicles-grid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Number Plates -->
+                <div class="detected-items" id="detected-plates">
+                    <h3>📋 Number Plates Detected</h3>
+                    <div class="plates-list" id="plates-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="result-actions">
+                    <button id="new-analysis-btn" class="btn-secondary">
+                        <span class="btn-icon">🔄</span>
+                        New Analysis
+                    </button>
+                    <button id="notify-btn" class="btn-danger" style="display: none;">
+                        <span class="btn-icon">📧</span>
+                        Notify Authorities
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Powered by YOLOv11 Computer Vision • Real-time Accident Detection</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropZone = document.getElementById('accident-drop-zone');
+            const fileInput = document.getElementById('accident-file-input');
+            const fileInfo = document.getElementById('accident-file-info');
+            const uploadPreview = document.getElementById('upload-preview');
+            const previewImage = document.getElementById('preview-image');
+            const removeBtn = document.getElementById('remove-image');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const processingInfo = document.getElementById('processing-info');
+            const resultsSection = document.getElementById('results-section');
+            const newAnalysisBtn = document.getElementById('new-analysis-btn');
+
+            let selectedFile = null;
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Highlight drop zone
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            // Handle dropped files
+            dropZone.addEventListener('drop', function (e) {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // Handle click to upload
+            dropZone.addEventListener('click', function () {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function (e) {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+
+            function handleFile(file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/bmp'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPG, PNG, BMP)');
+                    return;
+                }
+
+                selectedFile = file;
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    dropZone.style.display = 'none';
+                    uploadPreview.style.display = 'block';
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Remove image
+            removeBtn.addEventListener('click', function () {
+                selectedFile = null;
+                fileInput.value = '';
+                dropZone.style.display = 'block';
+                uploadPreview.style.display = 'none';
+                analyzeBtn.disabled = true;
+                resultsSection.style.display = 'none';
+            });
+
+            // Analyze button click
+            analyzeBtn.addEventListener('click', async function () {
+                if (!selectedFile) return;
+
+                // Show processing
+                analyzeBtn.disabled = true;
+                processingInfo.style.display = 'flex';
+                resultsSection.style.display = 'none';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
+
+                    const response = await fetch('/accident/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Analysis failed');
+                    }
+
+                    // Display results
+                    displayResults(data);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Analysis failed: ' + error.message);
+                } finally {
+                    processingInfo.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                }
+            });
+
+            function displayResults(data) {
+                resultsSection.style.display = 'block';
+
+                // Detection status
+                const statusDiv = document.getElementById('detection-status');
+                if (data.accident_detected) {
+                    statusDiv.innerHTML = `
+                        <div class="status-alert danger">
+                            <span class="status-icon">⚠️</span>
+                            <div class="status-text">
+                                <strong>ACCIDENT DETECTED</strong>
+                                <p>Potential accident identified in the image</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('notify-btn').style.display = 'inline-flex';
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status-alert success">
+                            <span class="status-icon">✓</span>
+                            <div class="status-text">
+                                <strong>NO ACCIDENT DETECTED</strong>
+                                <p>No accident was identified in the image</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('notify-btn').style.display = 'none';
+                }
+
+                // Annotated image
+                if (data.annotated_image) {
+                    document.getElementById('result-image').src = data.annotated_image;
+                    document.getElementById('result-image-container').style.display = 'block';
+                }
+
+                // Detected vehicles
+                const vehiclesGrid = document.getElementById('vehicles-grid');
+                vehiclesGrid.innerHTML = '';
+                if (data.vehicles && data.vehicles.length > 0) {
+                    data.vehicles.forEach(vehicle => {
+                        const vehicleDiv = document.createElement('div');
+                        vehicleDiv.className = 'vehicle-item';
+                        vehicleDiv.innerHTML = `
+                            <span class="vehicle-type">${vehicle.class}</span>
+                            <span class="vehicle-confidence">${(vehicle.confidence * 100).toFixed(1)}%</span>
+                        `;
+                        vehiclesGrid.appendChild(vehicleDiv);
+                    });
+                    document.getElementById('detected-vehicles').style.display = 'block';
+                } else {
+                    document.getElementById('detected-vehicles').style.display = 'none';
+                }
+
+                // Number plates
+                const platesList = document.getElementById('plates-list');
+                platesList.innerHTML = '';
+                if (data.plates && data.plates.length > 0) {
+                    data.plates.forEach(plate => {
+                        const plateDiv = document.createElement('div');
+                        plateDiv.className = 'plate-item';
+                        plateDiv.innerHTML = `
+                            <span class="plate-number">${plate.text}</span>
+                            <span class="plate-confidence">${(plate.confidence * 100).toFixed(1)}%</span>
+                        `;
+                        platesList.appendChild(plateDiv);
+                    });
+                    document.getElementById('detected-plates').style.display = 'block';
+                } else {
+                    document.getElementById('detected-plates').innerHTML = '<p class="no-data">No license plates detected</p>';
+                    document.getElementById('detected-plates').style.display = 'block';
+                }
+
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // New analysis button
+            newAnalysisBtn.addEventListener('click', function () {
+                selectedFile = null;
+                fileInput.value = '';
+                dropZone.style.display = 'block';
+                uploadPreview.style.display = 'none';
+                analyzeBtn.disabled = true;
+                resultsSection.style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // Notify authorities button (placeholder)
+            document.getElementById('notify-btn').addEventListener('click', function () {
+                alert('Email notification feature coming soon!\n\nThis will send accident details and number plates to local authorities.');
+            });
+        });
+    </script>
+</body>
+
+</html>

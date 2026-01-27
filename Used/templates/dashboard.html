@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Traffic Dashboard | AI System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: #1e3c72;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .video-panel {
+            flex: 2;
+            background: black;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-panel img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .stats-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #1e3c72;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        .signal-box {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .signal {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #f0f2f5;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .signal.green {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .signal.red {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            display: none;
+            /* Hidden by default */
+            font-weight: bold;
+            text-align: center;
+            animation: pulse 1s infinite;
+        }
+
+        .alert-box.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .violation-count {
+            font-size: 2rem;
+            text-align: center;
+            color: #dc3545;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>🚦 AI Traffic Control Dashboard</h2>
+        <a href="/" class="back-link">← Back to Home</a>
+    </header>
+
+    <div class="container">
+        <div class="video-panel">
+            <img src="{{ url_for('video_feed') }}" alt="Live Video Feed">
+        </div>
+
+        <div class="stats-panel">
+
+            <!-- Accident Alert -->
+            <div id="accidentAlert" class="alert-box">
+                🚨 ACCIDENT DETECTED! <br> Emergency Services Notified.
+            </div>
+
+            <!-- Traffic Control -->
+            <div class="card">
+                <h3>Signal Control</h3>
+                <div class="stat-row">
+                    <span>Active Green Lane:</span>
+                    <span id="greenLane" class="highlight">--</span>
+                </div>
+                <div class="stat-row">
+                    <span>Green Time Remaining:</span>
+                    <span id="greenTime" class="highlight">--s</span>
+                </div>
+
+                <div class="signal-box">
+                    <div id="lane1Signal" class="signal">LANE 1</div>
+                    <div id="lane2Signal" class="signal">LANE 2</div>
+                </div>
+            </div>
+
+            <!-- Density Stats -->
+            <div class="card">
+                <h3>Live Density</h3>
+                <div class="stat-row">
+                    <span>Lane 1 Count:</span>
+                    <span id="lane1Count" class="highlight">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Lane 2 Count:</span>
+                    <span id="lane2Count" class="highlight">0</span>
+                </div>
+            </div>
+
+            <!-- Violations -->
+            <div class="card">
+                <h3>Violations (Helmet)</h3>
+                <div class="violation-count" id="violationCount">0</div>
+                <p style="text-align: center; color: #666;">Violations detected in current frame</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Density
+                    document.getElementById('lane1Count').innerText = data.lane_1_count;
+                    document.getElementById('lane2Count').innerText = data.lane_2_count;
+
+                    // Signal
+                    document.getElementById('greenLane').innerText = data.green_lane;
+                    document.getElementById('greenTime').innerText = data.green_time + 's';
+
+                    const lane1 = document.getElementById('lane1Signal');
+                    const lane2 = document.getElementById('lane2Signal');
+
+                    if (data.green_lane === 'LANE 1') {
+                        lane1.classList.add('green');
+                        lane1.classList.remove('red');
+                        lane2.classList.add('red');
+                        lane2.classList.remove('green');
+                    } else {
+                        lane1.classList.add('red');
+                        lane1.classList.remove('green');
+                        lane2.classList.add('green');
+                        lane2.classList.remove('red');
+                    }
+
+                    // Accident
+                    const alertBox = document.getElementById('accidentAlert');
+                    if (data.accident_alert) {
+                        alertBox.classList.add('active');
+                        alertBox.style.backgroundColor = '#f8d7da';
+                        alertBox.style.color = '#721c24';
+                        alertBox.style.borderColor = '#f5c6cb';
+                    } else {
+                        alertBox.classList.remove('active');
+                    }
+
+                    // Violations
+                    document.getElementById('violationCount').innerText = data.violations;
+                })
+                .catch(error => console.error('Error fetching stats:', error));
+        }
+
+        // Poll every 1 second
+        setInterval(updateStats, 1000);
+    </script>
+
+</body>
+
+</html>

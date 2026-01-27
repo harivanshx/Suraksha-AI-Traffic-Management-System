@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Road Safety & Traffic Control System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        nav {
+            background-color: #ffffff;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        .cta-button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none !important;
+            font-weight: bold;
+        }
+        .cta-button:hover {
+            background-color: #c0392b;
+        }
+
+        section {
+            padding: 60px 20px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        section h2 {
+            font-size: 2.2rem;
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+
+        section p {
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: white;
+            background-color: #2a5298;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .card a:hover {
+            background-color: #1e3c72;
+        }
+
+        .team {
+            text-align: center;
+            margin: 40px 0;
+            font-style: italic;
+            color: #555;
+        }
+
+        footer {
+            background-color: #1e3c72;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Road Safety & Traffic Control System</h1>
+    <p>
+        Hey, we're a team of engineers tired of seeing lives lost on Indian roads every day. 
+        Our AI-powered system is built to detect accidents fast, manage traffic smarter, 
+        and get help to people quicker. so fewer families have to go through the worst.
+    </p>
+</header>
+
+<nav>
+    <a href="#problem">The Problem</a>
+    <a href="#solution">What We're Building</a>
+    <a href="#modules">Key Features</a>
+    <a href="/dashboard" class="cta-button">🚀 Launch Dashboard</a>
+</nav>
+
+<section id="problem">
+    <h2>🚨 Why This Keeps Happening</h2>
+    <p>
+        In 2024 alone, around 1.77 lakh people lost their lives in road accidents in India—that's over 480 deaths every single day. 
+        Many of these tragedies aren't just because of the crash itself, but because help doesn't arrive in time.
+    </p>
+    <p>
+        The "golden hour" is real: if emergency services can reach victims quickly, a huge number of deaths (some studies say up to 30-50%) can be prevented. 
+        But right now, delays in reporting, no exact location sharing, jammed roads, and slow response mean too many people don't make it.
+    </p>
+    <p>
+        We've seen the stats, read the stories, and honestly—it hits hard. We wanted to do something about it.
+    </p>
+</section>
+
+<section id="solution">
+    <h2>💡 Our Take on Fixing This</h2>
+    <p>
+        We're working on a practical, AI-driven system that spots accidents the moment they happen, 
+        handles traffic intelligently, and alerts the right people instantly with exact location and details.
+    </p>
+    <p>
+        It can run as a mobile app for riders/drivers, get built into smart helmets, or connect to city CCTV cameras. 
+        Using computer vision, sensors, GPS, and quick decision-making, it detects crashes, fires, violations—and gets help moving fast.
+    </p>
+    <p>
+        No more waiting around wondering if anyone knows. Just faster action to save lives.
+    </p>
+</section>
+
+<section id="modules">
+    <h2>🧩 What Our System Actually Does</h2>
+
+    <div class="card-container">
+
+        <div class="card">
+            <h3>Accident Detection</h3>
+            <p>
+                Uses cameras + sensors to spot crashes in real-time (even minor ones or bike falls). 
+                Sends instant alert with GPS location, photos, and time so help arrives quicker.
+            </p>
+            <a href="#">Learn More</a>
+        </div>
+
+        <div class="card">
+            <h3>Smart Traffic Density Control</h3>
+            <p>
+                Watches vehicle flow with AI, adjusts signals on the fly to cut congestion—no more endless red lights when roads are empty.
+            </p>
+            <a href="#">Learn More</a>
+        </div>
+
+        <div class="card">
+            <h3>Emergency Vehicle Priority</h3>
+            <p>
+                Spots ambulances, fire trucks, police—automatically turns lights green for them and holds others so they reach faster.
+            </p>
+            <a href="#">Learn More</a>
+        </div>
+
+        <div class="card">
+            <h3>Traffic Rule Violation Detection</h3>
+            <p>
+                Catches no-helmet riding, signal jumping, wrong-way driving using live video analysis. Helps enforce rules without constant manual checks.
+            </p>
+            <a href="#">Learn More</a>
+        </div>
+
+        <div class="card">
+            <h3>Smart Helmet Integration</h3>
+            <p>
+                For two-wheeler riders—sensors in the helmet detect hard falls or crashes, auto-alert family + emergency if the rider is unresponsive.
+            </p>
+            <a href="#">Learn More</a>
+        </div>
+
+        <div class="card">
+            <h3>Central Monitoring Dashboard</h3>
+            <p>
+                A simple web dashboard for traffic police / authorities to see live incidents, traffic patterns, and response status—all in one place.
+            </p>
+            <a href="/dashboard">Go to Dashboard</a>
+        </div>
+
+    </div>
+
+    <div class="team">
+        <h2>Meet the Team</h2>
+        <p>
+            This project is brought to you by:<br>
+            <strong>Harivansh Bhardwaj</strong> (Team Lead)<br>
+            Pooja Pawar<br>
+            Shashwat Saxena<br>
+            Pratyush
+        </p>
+        <p>We built this because we care , let's make roads safer together.</p>
+    </div>
+</section>
+
+<section id="impact">
+    <h2>🌍 What We Hope to Achieve</h2>
+    <p>
+        Faster emergency response, fewer preventable deaths, smoother traffic, and better rule-following overall. 
+        If we can shave even minutes off response times in cities and highways, it could save thousands of lives every year.
+    </p>
+    <p>
+        We're aiming for smarter, safer roads across India—one alert, one green light, one saved life at a time.
+    </p>
+</section>
+
+<footer>
+    <p>
+        © 2026 Smart Road Safety Project | Built with ❤️ by Harivansh, Pooja, Shashwat & Pratyush<br>
+        Designed for academic/research use — open to collaboration!
+    </p>
+</footer>
+
+</body>
+</html>

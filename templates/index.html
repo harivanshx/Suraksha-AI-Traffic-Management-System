@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Traffic Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-nav">
+                    <a href="/" class="back-btn">
+                        <span>←</span>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <div class="traffic-light-icon">
+                    <div class="light red"></div>
+                    <div class="light yellow"></div>
+                    <div class="light green active"></div>
+                </div>
+                <div class="header-text">
+                    <h1>🚦 AI Traffic Management System</h1>
+                    <p>Intelligent Traffic Control Using Computer Vision</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content" >
+            <div class="info-card">
+                <h2>📤 Upload Traffic Data</h2>
+                <p>Upload videos or images for each traffic direction. The system will analyze traffic density and
+                    recommend optimal signal timings.</p>
+                <div class="supported-formats">
+                    <strong>Supported formats:</strong>
+                    <span class="format-badge">Videos: MP4, AVI, MOV, MKV</span>
+                    <span class="format-badge">Images: JPG, PNG, BMP</span>
+                </div>
+            </div>
+
+            <!-- Bulk Upload Section -->
+            <div class="bulk-upload-section" hidden="hidden">
+                <div class="bulk-upload-card">
+                    <h3>🚀 Quick Upload - All 4 Directions</h3>
+                    <p>Click the button below, then <strong>hold Ctrl (or Cmd on Mac)</strong> and click 4 images to
+                        select them all at once</p>
+                    <div class="bulk-upload-controls">
+                        <button id="bulk-select-btn" class="btn-secondary">
+                            <span class="btn-icon">📁</span>
+                            Select 4 Images (Ctrl+Click)
+                        </button>
+                        <input type="file" id="bulk-file-input" class="file-input" accept="image/*" multiple
+                            style="display: none;">
+                        <div id="bulk-upload-status" class="bulk-status"></div>
+                    </div>
+                    <div id="bulk-preview" class="bulk-preview" style="display: none;"></div>
+                </div>
+            </div>
+
+         
+
+            <div class="upload-grid">
+                <!-- North -->
+                <div class="upload-zone" data-direction="NORTH">
+                    <div class="direction-label">
+                        <span class="arrow">↑</span>
+                        <span>NORTH</span>
+                    </div>
+                    <div class="drop-zone" id="drop-north">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <p class="drop-text">Drag & Drop or Click to Upload</p>
+                            <p class="file-info">No file selected</p>
+                        </div>
+                        <input type="file" id="file-north" class="file-input" accept="video/*,image/*">
+                    </div>
+                    <div class="upload-status" id="status-north"></div>
+                </div>
+
+                <!-- East -->
+                <div class="upload-zone" data-direction="EAST">
+                    <div class="direction-label">
+                        <span class="arrow">→</span>
+                        <span>EAST</span>
+                    </div>
+                    <div class="drop-zone" id="drop-east">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <p class="drop-text">Drag & Drop or Click to Upload</p>
+                            <p class="file-info">No file selected</p>
+                        </div>
+                        <input type="file" id="file-east" class="file-input" accept="video/*,image/*">
+                    </div>
+                    <div class="upload-status" id="status-east"></div>
+                </div>
+
+                <!-- South -->
+                <div class="upload-zone" data-direction="SOUTH">
+                    <div class="direction-label">
+                        <span class="arrow">↓</span>
+                        <span>SOUTH</span>
+                    </div>
+                    <div class="drop-zone" id="drop-south">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <p class="drop-text">Drag & Drop or Click to Upload</p>
+                            <p class="file-info">No file selected</p>
+                        </div>
+                        <input type="file" id="file-south" class="file-input" accept="video/*,image/*">
+                    </div>
+                    <div class="upload-status" id="status-south"></div>
+                </div>
+
+                <!-- West -->
+                <div class="upload-zone" data-direction="WEST">
+                    <div class="direction-label">
+                        <span class="arrow">←</span>
+                        <span>WEST</span>
+                    </div>
+                    <div class="drop-zone" id="drop-west">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <p class="drop-text">Drag & Drop or Click to Upload</p>
+                            <p class="file-info">No file selected</p>
+                        </div>
+                        <input type="file" id="file-west" class="file-input" accept="video/*,image/*">
+                    </div>
+                    <div class="upload-status" id="status-west"></div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="run-simulation" class="btn-primary" disabled>
+                    <span class="btn-icon">▶️</span>
+                    Run Simulation
+                </button>
+                <div class="processing-info" id="processing-info" style="display: none;">
+                    <div class="loader"></div>
+                    <p>Processing traffic data...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Made with love by Harivansh Bhardwaj , Pooja Pawar , Shashwat Singh, Pratyush Saxena
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

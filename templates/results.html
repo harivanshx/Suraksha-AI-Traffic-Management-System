@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Results - AI Traffic Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="traffic-light-icon">
+                    <div class="light red"></div>
+                    <div class="light yellow"></div>
+                    <div class="light green active"></div>
+                </div>
+                <div class="header-text">
+                    <h1>📊 Traffic Analysis Results</h1>
+                    <p>AI-Generated Traffic Signal Recommendations</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-content">
+            <!-- Summary Section -->
+            <div class="summary-card">
+                <h2>🎯 Summary</h2>
+                <p>Analysis completed for <strong>{{ results.direction_results|length }}</strong> traffic directions</p>
+                <p class="processing-mode">Processing Mode: <span class="badge">{{ results.processing_mode|upper
+                        }}</span></p>
+            </div>
+
+            <!-- Optimal Sequence -->
+            <div class="sequence-card">
+                <h2>🔄 Optimal Signal Sequence</h2>
+                <p class="helper-text">Recommended order based on traffic congestion (highest priority first)</p>
+                <div class="sequence-display">
+                    {% for direction in results.recommendations.optimal_sequence %}
+                    <div class="sequence-item">
+                        <div class="sequence-number">{{ loop.index }}</div>
+                        <div class="sequence-direction">{{ direction }}</div>
+                        <div class="sequence-arrow">→</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Intersection Simulator -->
+            <div class="intersection-simulator-card">
+                <h2>🚥 Live Intersection Simulator</h2>
+                <p class="helper-text">Watch how traffic lights change based on your analysis. Click "Start Simulation"
+                    to begin.</p>
+
+                <div class="simulator-controls">
+                    <button id="start-simulation" class="btn-primary">
+                        <span class="btn-icon">▶️</span>
+                        Start Simulation
+                    </button>
+                    <button id="pause-simulation" class="btn-secondary" disabled>
+                        <span class="btn-icon">⏸️</span>
+                        Pause
+                    </button>
+                    <button id="reset-simulation" class="btn-secondary" disabled>
+                        <span class="btn-icon">🔄</span>
+                        Reset
+                    </button>
+                    <div class="simulation-timer">
+                        <span class="timer-label">Current Phase:</span>
+                        <span id="current-phase" class="timer-value">-</span>
+                        <span class="timer-label">Time Remaining:</span>
+                        <span id="time-remaining" class="timer-value">0s</span>
+                    </div>
+                </div>
+
+                <div class="intersection-container">
+                    <!-- North Direction -->
+                    <div class="intersection-direction north-direction" data-direction="NORTH">
+                        <div class="direction-preview">
+                            {% if 'NORTH' in results.images_base64 %}
+                            <img src="{{ results.images_base64['NORTH'] }}" alt="North View">
+                            {% endif %}
+                        </div>
+                        <div class="direction-info">
+                            <h3>↑ NORTH</h3>
+                            <div class="traffic-light-display">
+                                <div class="signal-light red-signal active"></div>
+                                <div class="signal-light yellow-signal"></div>
+                                <div class="signal-light green-signal"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Intersection -->
+                    <div class="intersection-center">
+                        <div class="intersection-icon">🚦</div>
+                        <div class="cycle-info">
+                            <div class="cycle-label">Cycle Progress</div>
+                            <div class="cycle-progress">
+                                <div id="cycle-progress-bar" class="cycle-progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- East Direction -->
+                    <div class="intersection-direction east-direction" data-direction="EAST">
+                        <div class="direction-preview">
+                            {% if 'EAST' in results.images_base64 %}
+                            <img src="{{ results.images_base64['EAST'] }}" alt="East View">
+                            {% endif %}
+                        </div>
+                        <div class="direction-info">
+                            <h3>→ EAST</h3>
+                            <div class="traffic-light-display">
+                                <div class="signal-light red-signal active"></div>
+                                <div class="signal-light yellow-signal"></div>
+                                <div class="signal-light green-signal"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- South Direction -->
+                    <div class="intersection-direction south-direction" data-direction="SOUTH">
+                        <div class="direction-preview">
+                            {% if 'SOUTH' in results.images_base64 %}
+                            <img src="{{ results.images_base64['SOUTH'] }}" alt="South View">
+                            {% endif %}
+                        </div>
+                        <div class="direction-info">
+                            <h3>↓ SOUTH</h3>
+                            <div class="traffic-light-display">
+                                <div class="signal-light red-signal active"></div>
+                                <div class="signal-light yellow-signal"></div>
+                                <div class="signal-light green-signal"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- West Direction -->
+                    <div class="intersection-direction west-direction" data-direction="WEST">
+                        <div class="direction-preview">
+                            {% if 'WEST' in results.images_base64 %}
+                            <img src="{{ results.images_base64['WEST'] }}" alt="West View">
+                            {% endif %}
+                        </div>
+                        <div class="direction-info">
+                            <h3>← WEST</h3>
+                            <div class="traffic-light-display">
+                                <div class="signal-light red-signal active"></div>
+                                <div class="signal-light yellow-signal"></div>
+                                <div class="signal-light green-signal"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direction Results Grid -->
+            <div class="results-grid">
+                {% for direction in ['NORTH', 'SOUTH', 'EAST', 'WEST'] %}
+                {% if direction in results.direction_results %}
+                {% set result = results.direction_results[direction] %}
+                {% set recommendation = results.recommendations[direction] %}
+                <div class="result-card" data-density="{{ recommendation.density_level }}">
+                    <div class="result-header">
+                        <h3>
+                            {% if direction == 'NORTH' %}↑{% endif %}
+                            {% if direction == 'SOUTH' %}↓{% endif %}
+                            {% if direction == 'EAST' %}→{% endif %}
+                            {% if direction == 'WEST' %}←{% endif %}
+                            {{ direction }}
+                        </h3>
+                        <span class="density-badge density-{{ recommendation.density_level|lower }}">
+                            {{ recommendation.density_level }}
+                        </span>
+                    </div>
+
+                    <!-- Traffic Stats -->
+                    <div class="traffic-stats">
+                        {% if results.processing_mode == 'video' %}
+                        <div class="stat">
+                            <div class="stat-label">Average Vehicles</div>
+                            <div class="stat-value">{{ result.average_vehicles }}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Peak Vehicles</div>
+                            <div class="stat-value">{{ result.max_vehicles }}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Frames Analyzed</div>
+                            <div class="stat-value">{{ result.frames_processed }}</div>
+                        </div>
+                        {% else %}
+                        <div class="stat">
+                            <div class="stat-label">Vehicle Count</div>
+                            <div class="stat-value">{{ result.vehicle_count }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Vehicle Type Breakdown -->
+                    <div class="vehicle-types">
+                        <h4>🚗 Vehicle Type Breakdown</h4>
+                        <div class="type-grid">
+                            <div class="type-item">
+                                <div class="type-icon">🚗</div>
+                                <div class="type-name">Cars</div>
+                                <div class="type-count">{{ result.vehicle_types.car }}</div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">🏍️</div>
+                                <div class="type-name">Motorcycles</div>
+                                <div class="type-count">{{ result.vehicle_types.motorcycle }}</div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">🚌</div>
+                                <div class="type-name">Buses</div>
+                                <div class="type-count">{{ result.vehicle_types.bus }}</div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">🚚</div>
+                                <div class="type-name">Trucks</div>
+                                <div class="type-count">{{ result.vehicle_types.truck }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signal Timing -->
+                    <div class="signal-timing">
+                        <h4>🚦 Signal Timing</h4>
+                        <div class="timing-display">
+                            <div class="timing-item green-timing">
+                                <div class="timing-light green-light"></div>
+                                <div class="timing-info">
+                                    <span class="timing-label">Green</span>
+                                    <span class="timing-value">{{ recommendation.green_duration }}s</span>
+                                </div>
+                            </div>
+                            <div class="timing-item yellow-timing">
+                                <div class="timing-light yellow-light"></div>
+                                <div class="timing-info">
+                                    <span class="timing-label">Yellow</span>
+                                    <span class="timing-value">{{ recommendation.yellow_duration }}s</span>
+                                </div>
+                            </div>
+                            <div class="timing-total">
+                                <strong>Total:</strong> {{ recommendation.total_duration }}s
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization -->
+                    {% if direction in results.images_base64 %}
+                    <div class="visualization">
+                        <h4>📸 Detection Visualization</h4>
+                        <img src="{{ results.images_base64[direction] }}" alt="{{ direction }} Detection"
+                            class="detection-image">
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- AI Traffic Assistant Chatbot -->
+            <div class="chatbot-card">
+                <div class="chatbot-header">
+                    <h2>🤖 AI Traffic Assistant</h2>
+                    <button id="chatbot-toggle" class="chatbot-toggle-btn" title="Toggle chatbot">−</button>
+                </div>
+                <div class="chatbot-container" id="chatbot-container">
+                    <!-- Chat messages area -->
+                    <div class="chatbot-messages" id="chatbot-messages">
+                        <div class="chat-message bot-message">
+                            <div class="message-content">
+                                <p>👋 Hello! I'm your AI Traffic Assistant. Ask me anything about the current traffic analysis, signal timings, vehicle counts, or get recommendations for traffic management.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading indicator -->
+                    <div class="chatbot-loading" id="chatbot-loading" style="display: none;">
+                        <span class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </div>
+
+                    <!-- Input area -->
+                    <div class="chatbot-input-area">
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="chatbot-input" 
+                                class="chatbot-input" 
+                                placeholder="Ask about traffic, signals, vehicle types..."
+                                autocomplete="off"
+                            >
+                            <button id="chatbot-send" class="chatbot-send-btn" title="Send message">
+                                <span>➤</span>
+                            </button>
+                        </div>
+                        <p class="chatbot-hint">Tip: Ask about vehicle types, congestion, signal timing, or recommendations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-section">
+                <button id="new-simulation" class="btn-primary">
+                    <span class="btn-icon">🔄</span>
+                    New Simulation
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>AI-Powered Traffic Management • Optimized Signal Timing • Real-time Analysis</p>
+        </footer>
+    </div>
+
+    <script>
+        // Traffic Signal Simulation
+        const recommendations = {{ results.recommendations| tojson }};
+        const optimalSequence = recommendations.optimal_sequence;
+
+        let currentPhaseIndex = 0;
+        let timeRemaining = 0;
+        let isRunning = false;
+        let isPaused = false;
+        let simulationInterval = null;
+        let currentState = 'red'; // red, green, yellow
+
+        const startBtn = document.getElementById('start-simulation');
+        const pauseBtn = document.getElementById('pause-simulation');
+        const resetBtn = document.getElementById('reset-simulation');
+        const phaseDisplay = document.getElementById('current-phase');
+        const timerDisplay = document.getElementById('time-remaining');
+        const progressBar = document.getElementById('cycle-progress-bar');
+
+        // Get all direction elements
+        const directions = {
+            'NORTH': document.querySelector('[data-direction="NORTH"]'),
+            'SOUTH': document.querySelector('[data-direction="SOUTH"]'),
+            'EAST': document.querySelector('[data-direction="EAST"]'),
+            'WEST': document.querySelector('[data-direction="WEST"]')
+        };
+
+        function setAllRed() {
+            Object.values(directions).forEach(dir => {
+                if (dir) {
+                    const redLight = dir.querySelector('.red-signal');
+                    const yellowLight = dir.querySelector('.yellow-signal');
+                    const greenLight = dir.querySelector('.green-signal');
+
+                    redLight.classList.add('active');
+                    yellowLight.classList.remove('active');
+                    greenLight.classList.remove('active');
+                }
+            });
+        }
+
+        function setDirectionLight(direction, color) {
+            const dirElement = directions[direction];
+            if (!dirElement) return;
+
+            const redLight = dirElement.querySelector('.red-signal');
+            const yellowLight = dirElement.querySelector('.yellow-signal');
+            const greenLight = dirElement.querySelector('.green-signal');
+
+            redLight.classList.remove('active');
+            yellowLight.classList.remove('active');
+            greenLight.classList.remove('active');
+
+            if (color === 'red') redLight.classList.add('active');
+            else if (color === 'yellow') yellowLight.classList.add('active');
+            else if (color === 'green') greenLight.classList.add('active');
+        }
+
+        function startPhase() {
+            const currentDirection = optimalSequence[currentPhaseIndex];
+            const recommendation = recommendations[currentDirection];
+
+            phaseDisplay.textContent = `${currentDirection} - GREEN`;
+            currentState = 'green';
+
+            // Set current direction to green, others to red
+            setAllRed();
+            setDirectionLight(currentDirection, 'green');
+
+            timeRemaining = recommendation.green_duration;
+            updateDisplay();
+        }
+
+        function updateSimulation() {
+            if (timeRemaining > 0) {
+                timeRemaining--;
+                updateDisplay();
+
+                // Update progress bar
+                const currentDirection = optimalSequence[currentPhaseIndex];
+                const recommendation = recommendations[currentDirection];
+                const totalDuration = currentState === 'green'
+                    ? recommendation.green_duration
+                    : recommendation.yellow_duration;
+                const progress = ((totalDuration - timeRemaining) / totalDuration) * 100;
+                progressBar.style.width = progress + '%';
+
+            } else {
+                // Phase complete, transition
+                const currentDirection = optimalSequence[currentPhaseIndex];
+                const recommendation = recommendations[currentDirection];
+
+                if (currentState === 'green') {
+                    // Transition to yellow
+                    currentState = 'yellow';
+                    setDirectionLight(currentDirection, 'yellow');
+                    timeRemaining = recommendation.yellow_duration;
+                    phaseDisplay.textContent = `${currentDirection} - YELLOW`;
+                    updateDisplay();
+
+                } else if (currentState === 'yellow') {
+                    // Transition to next phase
+                    currentPhaseIndex = (currentPhaseIndex + 1) % optimalSequence.length;
+                    startPhase();
+                }
+            }
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = timeRemaining + 's';
+        }
+
+        function startSimulation() {
+            if (isRunning && !isPaused) return;
+
+            if (!isRunning) {
+                setAllRed();
+                currentPhaseIndex = 0;
+                startPhase();
+            }
+
+            isRunning = true;
+            isPaused = false;
+
+            simulationInterval = setInterval(updateSimulation, 1000);
+
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+            startBtn.textContent = '▶️ Running...';
+        }
+
+        function pauseSimulation() {
+            if (!isRunning) return;
+
+            clearInterval(simulationInterval);
+            isPaused = true;
+
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            startBtn.innerHTML = '<span class="btn-icon">▶️</span> Resume';
+        }
+
+        function resetSimulation() {
+            clearInterval(simulationInterval);
+            isRunning = false;
+            isPaused = false;
+            currentPhaseIndex = 0;
+            timeRemaining = 0;
+            currentState = 'red';
+
+            setAllRed();
+            phaseDisplay.textContent = '-';
+            timerDisplay.textContent = '0s';
+            progressBar.style.width = '0%';
+
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            startBtn.innerHTML = '<span class="btn-icon">▶️</span> Start Simulation';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startSimulation);
+        pauseBtn.addEventListener('click', pauseSimulation);
+        resetBtn.addEventListener('click', resetSimulation);
+
+        // New simulation button
+        document.getElementById('new-simulation').addEventListener('click', function () {
+            fetch('/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error resetting simulation');
+                });
+        });
+    </script>
+    
+    <!-- AI Traffic Assistant Chatbot Script -->
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    <script>
+        // Initialize chatbot when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbot = new TrafficChatbot();
+        });
+    </script>
+</body>
+
+</html>

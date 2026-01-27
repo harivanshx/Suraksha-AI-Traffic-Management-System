@@ -1,0 +1,38 @@
+# AI-Based Traffic Management System
+# Production-ready dependencies
+
+# YOLO Object Detection (CPU-optimized)
+ultralytics>=8.0.0
+
+# Computer Vision and Image Processing (headless for deployment)
+opencv-python-headless>=4.8.0
+
+# Numerical Computing
+numpy>=1.24.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Progress Bars and Utilities
+tqdm>=4.65.0
+
+# Data Handling
+pandas>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Web Framework
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# Production Server
+gunicorn>=21.2.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# OCR for License Plate Recognition
+easyocr>=1.7.0
+# Google Generative AI (Gemini API for Traffic Assistant Chatbot)
+google-generativeai>=0.3.0
